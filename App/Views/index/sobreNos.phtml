@@ -1,8 +1,15 @@
 <h1>Sobre Nos</h1>
 <hr />
 
-<?php
-	foreach($this->view->dados as $indice => $valor) {
-		echo $valor.'<br />';
-	}
-?>
+
+<?php foreach ($this->view->dados as $indice => $info) { ?>
+	<h1 style="background-color:dodgerblue;color: navy;"><?= $info['titulo'] ?> </h1>
+	<br />
+	<div style="background-color:blanchedalmond">
+	<p><?= $info['descricao'] ?></p>
+	</div>
+	<hr />
+
+
+<?php } ?>
+
