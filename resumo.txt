@@ -1,0 +1,47 @@
+O projeto utiliza o Composer para carregar automaticamente as classes dos scripts e utiliza o padrão de arquitetura MVC para organizar os arquivos em pastas separadas por controladores, modelos de acesso ao Banco de Dados e telas de exibição de conteúdo.
+
+
+
+1 - O projeto se inicia no diretório público, onde o script inicial "index.php" é responsável por dar um require_once do arquivo de iniciação do composer "autoload.php". No mesmo script, um objeto qualquer é instanciado na classe Route do arquivo Route.php, contido na pasta App, mas que é puxado automaticamente através da referência do seu namespace App\Route, graças ao Composer. Uma vez instanciado um objeto na classe Route, toda a aplicação passa a receber um start, devido aos métodos __construct() das classes da mesma.
+
+2 - A classe Route possui um array contendo as rotas possíveis de serem acessadas pelo usuário, cada rota possível de ser acessada pelo usuário, possui uma URL, um script e uma ação possível (podendo duas rotas diferentes, acessarem um mesmo script, porém executarem métodos diferentes) e também possui um método que seta o valor da rota a ser trabalhada pela classe pai, Bootstrap.
+
+2.1 - A classe Route descende da classe Boostrap (um termo reservado aos arquivos de inicialização).
+
+A classe Bootstrap possui a lógica para pegar a rota acessada pelo usuário, que pode ser "index.php" ou "index.php/sobre_nos" e, através de um objeto instanciado na classe IndexControllre, executar o método correspondente à rota acessada pelo usuário.
+
+3 - A classe IndexController descende de Action e é responsável por, com base no método correspondente à rota acessada, exibir ao cliente a página/tela/view correta, já contendo a informação dinâmica correspondente, ou seja, já contendo a informação armazenada pelo Banco de Dados.
+
+Para saber qual é a informação correspondente à rota acessada, é preciso instanciar a classe de modelo de acesso ao Banco de Dados correspondente à rota acessada, por isso o IndexController, em qualquer um de seus actions, primeiro instancia um objeto na classe Container, executando a função "getModel()", passando como parâmetro o modelo de acesso à base de dados desejada.
+
+3.1 - A classe Container, por sua vez, retorna o modelo desejado e com a conexão já estabelecida. Para isso, ela primeiro instancia um objeto na classe desejada, depois retorna esse objeto com um objeto do tipo PDO contendo a conexão com o Banco de Dados como parâmetro.
+
+3.1.1 - A classe Container descende da classe Connection, que é responsável por realizar a conexão com o Banco de Dados e retornar um objeto PDO contendo os dados dessa conexão, além de tratar quaisquer falhas ocorridas na mesma.
+
+3.1.2 - Quer uma das classes modelo possíveis, executa uma consulta SQL no Banco de Dados e retorna um array contendo os dados requisitados.
+
+3.1.2.1 - Todos os modelos descendem da classe Model, que simplesmente cria um atributo do tipo objeto e vazio para se utilizado pelas classes filhas.
+
+Com o objeto instanciado no modelo correto e já com a conexão estabelecida, a classe IndexController armazena em um atributo de classe "$this->view->dados" o valor array contendo os dados, retornado pela classe modelo respectiva.
+
+Em seguida, a action da classe IndexController, executa uma função para renderizar a página requisitada no navegador do usuário, já com os dados recuperados pelo Banco de Dados. Pra isso, executa-se o método "$this->render()" da classe IndexController, graças à sua descendência da classe Action, passando como parâmetro, qual a view desejada e qual o layout desejado, supondo que uma mesma informação possa ser exibida de diversas formas, dependendo, por exemplo, da data comemorativa em questão.
+
+3.2 - A classe Action, por sua vez, cria o objeto "$this->view" para trabalhar com as informações de renderização , como a página desejada, o layout desejado e o conteúdo que será exibido. É, portanto, responsável pela lógica que produz o contéúdo visualizado pelos usuários.
+
+3.2.1 - O método "render()", recebe como parâmetro a URL requisitada e o layout especificado.
+
+Primeiramente, o método grava o valor da página desejada em "$this->view->page", depois realiza um teste para saber se o layout requisitado pela aplicação, de fato existe.
+
+Caso exista, será realizado um require_once do layout desejado.
+
+Caso não exista, será executado a função de exibição de conteúdo: content().
+
+3.2.1.1 - Os layouts são arquivos que formam a base para as views, ou seja, as páginas visualizadas pelos usuários, serão os layouts da aplicação, contendo a informação dinâmica contida nas views e são a responsáveis por formar a identidade visual da aplicação. Dentro de cada layout, entre o código HTML, haverão trechos de código PHP que executará a função $this->content() para exibir informações dinâmicas.
+
+3.2.2 - O método content() é responsável por pegar o nome da classe e extrair dela o caminho correto ao conteúdo desejado. Extraindo "index" de IndexController, para exibir as duas views possíveis do projeto, que estão contidas na pasta App/Views/index.
+
+Em seguida, é realizado um require_once da view desejada.
+
+3.2.2.1 - As views são arquivos phtml iguais aos layouts, com a diferença de que não são páginas html completas, mas apenas trechos de código html com conteúdo dinâmico PHP embutido, como dados recuperados de um Banco de Dados, por exemplo.
+
+/resumo feito pelo aluno Josias Buday na Aula 533/
